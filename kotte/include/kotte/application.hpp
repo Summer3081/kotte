@@ -31,7 +31,7 @@ namespace kotte
         std::size_t enemy_turns = 0;
     };
 
-    class Application final {
+    class Application final{
     public:
         Application(
             int window_width,
@@ -47,13 +47,6 @@ namespace kotte
         void request_exit() noexcept;
 
     private:
-        enum class State{
-            playing,
-            victory,
-            defeat
-        };
-        State game_state_ = State::playing;     //因为state是需要长期使用的，所以名字结尾带_
-        
         struct FrameActions final {
             Vector2 player_movement_direction{};
             bool place_bomb = false;
@@ -151,8 +144,8 @@ namespace kotte
         Camera camera_;
         Random random_;
         TileMap map_;
-        EntityStore entities_;             /////////////////
-        std::vector<EntityHandle> enemy_handles_;          //////////////////   
+        EntityStore entities_;
+        std::vector<EntityHandle> enemy_handles_;
         std::vector<EntityHandle> active_bomb_handles_;
         SpatialGrid spatial_grid_;
         Renderer renderer_;
@@ -163,7 +156,7 @@ namespace kotte
         std::vector<BlastEffect> blast_effects_;
         CollisionDiagnostics collision_diagnostics_;
         std::uint64_t seed_;
-        EntityHandle player_handle_;        ////////////////////////
+        EntityHandle player_handle_;
         bool exit_requested_ = false;
     };
 }
