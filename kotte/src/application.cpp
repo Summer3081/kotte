@@ -94,6 +94,9 @@ namespace kotte
 
     void Application::update_gameplay(float delta_time){
         // The player and every enemy are movers; each asks its own collision question.
+        if (game_state_ != State::playing) {
+            return;
+        } 
         update_player(delta_time);
         update_enemies(delta_time);
         queue_bomb_placement();
@@ -113,7 +116,7 @@ namespace kotte
             if(state.fuse_remaining > 0.0f){
                 continue;
             }
-
+            
             state.fuse_remaining = 0.0f;
             state.detonation_requested = true;
 
@@ -126,6 +129,7 @@ namespace kotte
                 state.blast_range
             });
         }
+
     }
 
     void Application::resolve_gameplay_facts(){
@@ -172,6 +176,10 @@ namespace kotte
     }
 
     void Application::update_player(float delta_time){
+        if (!entities_.contains(player_handle_)){
+            return;
+        }
+        
         const Vector2 direction = frame_actions_.player_movement_direction;
 
         Entity& player_entity = player();
@@ -198,6 +206,26 @@ namespace kotte
 
         const Rectangle new_world_bounds = entity_world_bounds(player_entity);
         spatial_grid_.update(player_handle_, old_world_bounds, new_world_bounds);
+        
+        const Rectangle player_collision_bounds = entity_collision_bounds(player_entity);
+        const SpatialQuery broad_phase_candidates_query = spatial_grid_.query(player_collision_bounds);
+
+        for (const EntityHandle candidate_handles : broad_phase_candidates_query.entity_handles){
+            if (candidate_handles == player_handle_) {
+                continue;
+            }
+
+            const Entity* candidate = entities_.try_get(candidate_handles);
+
+            if (candidate == nullptr || candidate->kind != EntityKind::enemy) {
+                continue;
+            }
+
+            if (CheckCollisionRecs(player_collision_bounds, entity_collision_bounds(*candidate))) {
+                destroy_entity_requests_.push_back({ player_handle_ });
+                break;
+            }
+        }
     }
 
     void Application::try_move_player(Vector2 axis_displacement){
@@ -325,6 +353,14 @@ namespace kotte
         });
 
         destroy_entity_requests_.clear();
+
+        if (game_state_ == State::playing) {
+            if (!entities_.contains(player_handle_)) {
+                game_state_ = State::defeat;
+            }else if(enemy_handles_.empty()){           //////////////////////////// 
+                game_state_ = State::victory;
+            }
+        }
     }
 
     bool Application::resolve_blast_tile(
@@ -343,6 +379,7 @@ namespace kotte
         };
         const SpatialQuery contacts = spatial_grid_.query(tile_bounds);
         bool blocked_by_crate = false;
+        bool blocked_by_player = false;
 
         for(const EntityHandle handle : contacts.entity_handles){
             const Entity* candidate = entities_.try_get(handle);
@@ -361,7 +398,8 @@ namespace kotte
                 blocked_by_crate = true;
                 break;
             case EntityKind::player:
-                // Player-hit consequences are outside the Week 6 lifetime seam.
+                destroy_entity_requests_.push_back({handle});
+                blocked_by_player = true;
                 break;
             }
         }
@@ -546,6 +584,14 @@ namespace kotte
         DrawText(diagnostics.c_str(), 10, window_.height() - 54, 20, RAYWHITE);
 
         DrawText("move: WASD/arrows | bomb: Space | quit: Q/Escape", 10, window_.height() - 30, 20, LIGHTGRAY);
+
+        if (game_state_ == State::victory) {
+            DrawText("Victory!", window_.width() / 2 - 100, window_.height() / 2 - 50, 60, GOLD);
+        }
+        
+        if (game_state_ == State::defeat) {
+            DrawText("Defeat", window_.width() / 2 - 100, window_.height() / 2 - 50, 60, RED);
+        }
     }
 
     void Application::populate_entities(){
