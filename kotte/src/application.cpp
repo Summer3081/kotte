@@ -85,7 +85,12 @@ namespace kotte
         if(IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)){
             movement_direction.y += 1.0f;
         }
-
+        if (game_state_ != State::playing) {    //////////////////////////
+            if (IsKeyPressed(KEY_ENTER)) {
+                return restart();
+            }
+        }
+        
         // Normalize intent before simulation so bindings cannot change movement speed.
         if(movement_direction.x != 0.0f || movement_direction.y != 0.0f){
             movement_direction = Vector2Normalize(movement_direction);
@@ -100,6 +105,7 @@ namespace kotte
         update_player(delta_time);
         update_enemies(delta_time);
         queue_bomb_placement();
+
     }
 
     void Application::update_timed_gameplay(float delta_time){
@@ -207,8 +213,8 @@ namespace kotte
         const Rectangle new_world_bounds = entity_world_bounds(player_entity);
         spatial_grid_.update(player_handle_, old_world_bounds, new_world_bounds);
         
-        const Rectangle player_collision_bounds = entity_collision_bounds(player_entity);
-        const SpatialQuery broad_phase_candidates_query = spatial_grid_.query(player_collision_bounds);
+        const Rectangle player_world_bounds = entity_world_bounds(player_entity);
+        const SpatialQuery broad_phase_candidates_query = spatial_grid_.query(player_world_bounds);
 
         for (const EntityHandle candidate_handles : broad_phase_candidates_query.entity_handles){
             if (candidate_handles == player_handle_) {
@@ -221,7 +227,7 @@ namespace kotte
                 continue;
             }
 
-            if (CheckCollisionRecs(player_collision_bounds, entity_collision_bounds(*candidate))) {
+            if (CheckCollisionRecs(player_world_bounds, entity_world_bounds(*candidate))) {
                 destroy_entity_requests_.push_back({ player_handle_ });
                 break;
             }
@@ -317,6 +323,25 @@ namespace kotte
         }
 
         place_bomb_requests_.clear();
+    }
+
+    void Application::restart(){    //////////////////////////////
+        game_state_ = State::playing;
+          
+        place_bomb_requests_.clear();        //放炸弹的请求
+        bomb_detonated_facts_.clear();       //炸弹爆炸
+        blast_effects_.clear();              //炸弹爆炸特效
+        active_bomb_handles_.clear();        //上一局的炸弹和敌人名单
+        enemy_handles_.clear();              //活着的敌人名单
+        destroy_entity_requests_.clear();    //遗留的死人名单
+        
+        entities_ = EntityStore{};
+        spatial_grid_ = SpatialGrid{ {
+        static_cast<float>(map_.width() * tile_size_), static_cast<float>(map_.height() * tile_size_) }, 
+        spatial_cell_size_ };       /////////////////
+        
+        populate_entities();
+        initialize_enemies();
     }
 
     void Application::apply_entity_destructions(){
@@ -430,7 +455,11 @@ namespace kotte
     void Application::update_camera(float delta_time) noexcept{
         (void) delta_time; // name the argument to avoid the static analyzer yelling at us. :) We'll animate the camera later.
         camera_.set_viewport_size(window_.size());
-        camera_.set_centre(player().world_position);
+
+        const Entity* current_player = entities_.try_get(player_handle_);
+        if (current_player != nullptr) {
+            camera_.set_centre(current_player -> world_position); //////////////
+        }
     }
 
     void Application::render(){

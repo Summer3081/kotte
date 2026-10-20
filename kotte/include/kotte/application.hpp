@@ -94,6 +94,7 @@ namespace kotte
         void queue_bomb_placement();
         void apply_entity_destructions();
         void apply_bomb_placements();
+        void restart();
         [[nodiscard]] bool resolve_blast_tile(
             BlastEffect& effect,
             int column,
@@ -151,16 +152,16 @@ namespace kotte
         Camera camera_;
         Random random_;
         TileMap map_;
-        EntityStore entities_;             /////////////////
-        std::vector<EntityHandle> enemy_handles_;          //////////////////   
-        std::vector<EntityHandle> active_bomb_handles_;
+        EntityStore entities_;             //////////////////
+        std::vector<EntityHandle> enemy_handles_;          ///////////////////   
+        std::vector<EntityHandle> active_bomb_handles_;    ///////////////////
         SpatialGrid spatial_grid_;
         Renderer renderer_;
         FrameActions frame_actions_;
         std::vector<PlaceBombRequest> place_bomb_requests_;
         std::vector<BombDetonated> bomb_detonated_facts_;
-        std::vector<DestroyEntityRequest> destroy_entity_requests_;
-        std::vector<BlastEffect> blast_effects_;
+        std::vector<DestroyEntityRequest> destroy_entity_requests_;   //////////////////
+        std::vector<BlastEffect> blast_effects_;                      //////////////////
         CollisionDiagnostics collision_diagnostics_;
         std::uint64_t seed_;
         EntityHandle player_handle_;        ////////////////////////
