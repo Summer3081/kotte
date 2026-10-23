@@ -217,20 +217,43 @@ namespace kotte
         const SpatialQuery broad_phase_candidates_query = spatial_grid_.query(player_world_bounds);
 
         for (const EntityHandle candidate_handles : broad_phase_candidates_query.entity_handles){
+            //player
             if (candidate_handles == player_handle_) {
                 continue;
             }
 
             const Entity* candidate = entities_.try_get(candidate_handles);
 
-            if (candidate == nullptr || candidate->kind != EntityKind::enemy) {
+            // nullptr?
+            if (candidate == nullptr) {
                 continue;
             }
-
             if (CheckCollisionRecs(player_world_bounds, entity_world_bounds(*candidate))) {
-                destroy_entity_requests_.push_back({ player_handle_ });
-                break;
+                //candidate is enemy
+                if (candidate->kind == EntityKind::enemy) {
+                    destroy_entity_requests_.push_back({ player_handle_ });
+                    break;
+                }
+                //candidate is power up
+                if (candidate->kind == EntityKind::power_up) {
+                    destroy_entity_requests_.push_back({ candidate_handles });
+
+                    if (update_blast_range_ <= 7) {
+                        update_blast_range_ += 1;
+                    }
+                }
             }
+
+            //const Entity* candidate = entities_.try_get(candidate_handles);
+            //if (CheckCollisionRecs(player_world_bounds, entity_world_bounds(*candidate))) {
+            //    if (candidate == nullptr || candidate->kind != EntityKind::enemy) {
+            //          continue;
+            //    }
+            //}
+            //if (CheckCollisionRecs(player_world_bounds, entity_world_bounds(*candidate))) {
+            //    destroy_entity_requests_.push_back({ player_handle_ });
+            //    break;
+            //}
         }
     }
 
@@ -311,7 +334,7 @@ namespace kotte
                 .bomb_state = BombState{
                     .owner = request.owner,
                     .fuse_remaining = bomb_fuse_seconds_,
-                    .blast_range = bomb_blast_range_
+                    .blast_range = update_blast_range_   ///////////////
                 }
             };
 
@@ -626,6 +649,11 @@ namespace kotte
             collision_diagnostics_.contacts);
         DrawText(diagnostics.c_str(), 10, 106, 20, RAYWHITE);
 
+        diagnostics = std::format(
+            "bomb blast range: {}",
+            update_blast_range_);
+        DrawText(diagnostics.c_str(), 10, 130, 20, RAYWHITE);
+
         diagnostics = std::format("seed: {}", seed_);
         DrawText(diagnostics.c_str(), 10, window_.height() - 78, 20, RAYWHITE);
 
@@ -679,6 +707,19 @@ namespace kotte
                 }
             }
         }
+
+        /////////////where power up is
+        const Entity power_up_entity1{ EntityKind::power_up,tile_centre(3, 6)};
+        const EntityHandle power_up_handle1 = entities_.create(power_up_entity1);
+        spatial_grid_.insert(power_up_handle1, entity_world_bounds(power_up_entity1));
+        //power up 2
+        const Entity power_up_entity2{ EntityKind::power_up,tile_centre(7, 13) };
+        const EntityHandle power_up_handle2 = entities_.create(power_up_entity2);
+        spatial_grid_.insert(power_up_handle2, entity_world_bounds(power_up_entity2));
+
+        const Entity power_up_entity3{ EntityKind::power_up,tile_centre(27, 15) };
+        const EntityHandle power_up_handle3 = entities_.create(power_up_entity3);
+        spatial_grid_.insert(power_up_handle3, entity_world_bounds(power_up_entity3));
     }
 
     void Application::initialize_enemies(){
@@ -718,6 +759,7 @@ namespace kotte
         case EntityKind::bomb: size = {22.0f, 22.0f}; break;
         case EntityKind::crate: size = {36.0f, 48.0f}; break;
         case EntityKind::enemy: size = {28.0f, 30.0f}; break;
+        case EntityKind::power_up: size = { 20.0f, 20.0f }; break;  //////////////
         }
 
         const Vector2 top_left = entity.world_position - Vector2{size.x / 2.0f, size.y};
@@ -734,6 +776,7 @@ namespace kotte
         case EntityKind::bomb: size = {18.0f, 12.0f}; break;
         case EntityKind::crate: size = {32.0f, 32.0f}; break;
         case EntityKind::enemy: size = {24.0f, 14.0f}; break;
+        case EntityKind::power_up: size = {16.0f, 10.0f}; break;  ///////////////
         }
 
         const Vector2 top_left = entity.world_position - Vector2{size.x / 2.0f, size.y};
@@ -811,6 +854,8 @@ namespace kotte
             return true;
         case EntityKind::bomb:
             return true;       //////////////////bomb has solidified
+        case EntityKind::power_up:
+            return false;
         }
 
         return false;
@@ -870,6 +915,7 @@ namespace kotte
         case EntityKind::bomb: return bomb_color_;
         case EntityKind::crate: return crate_color_;
         case EntityKind::enemy: return enemy_color_;
+        case EntityKind::power_up: return power_up_color_; ////////////////
         }
         return MAGENTA;
     }

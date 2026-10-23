@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{f7a23e8a-1bac-4116-b16d-bdad0f7fd4ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -71,5 +74,28 @@
     <ClInclude Include="include\kotte\entity_store.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\raw\bombman\gui_menu_background.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="..\assets\raw\bombman\player_down.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="..\assets\raw\bombman\item_bomb.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="..\assets\raw\bombman\item_flame.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="..\assets\raw\bombman\player_up.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="..\assets\raw\bombman\player_left.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="..\assets\raw\bombman\player_right.png">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>

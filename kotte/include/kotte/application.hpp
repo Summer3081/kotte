@@ -147,6 +147,7 @@ namespace kotte
         static constexpr Color crate_color_{0xb0, 0x72, 0x3c, 0xff};
         static constexpr Color enemy_color_{0xd9, 0x4f, 0x70, 0xff};
         static constexpr Color wall_color_{0x78, 0x5f, 0x47, 0xff};
+        static constexpr Color power_up_color_{0xf2, 0x8f, 0x3b, 0xe8}; ///////////////
 
         Window window_; // Constructed first, destroyed last.
         Camera camera_;
@@ -162,9 +163,10 @@ namespace kotte
         std::vector<BombDetonated> bomb_detonated_facts_;
         std::vector<DestroyEntityRequest> destroy_entity_requests_;   //////////////////
         std::vector<BlastEffect> blast_effects_;                      //////////////////
+        std::uint8_t update_blast_range_ = bomb_blast_range_;     //////////////powerup bomb
         CollisionDiagnostics collision_diagnostics_;
         std::uint64_t seed_;
-        EntityHandle player_handle_;        ////////////////////////
+        EntityHandle player_handle_;        /////////////////
         bool exit_requested_ = false;
     };
 }

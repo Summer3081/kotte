@@ -124,6 +124,15 @@
     <ClInclude Include="include\kotte\tile_map.hpp" />
     <ClInclude Include="include\kotte\window.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\raw\bombman\gui_menu_background.png" />
+    <Image Include="..\assets\raw\bombman\item_bomb.png" />
+    <Image Include="..\assets\raw\bombman\item_flame.png" />
+    <Image Include="..\assets\raw\bombman\player_down.png" />
+    <Image Include="..\assets\raw\bombman\player_left.png" />
+    <Image Include="..\assets\raw\bombman\player_right.png" />
+    <Image Include="..\assets\raw\bombman\player_up.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
