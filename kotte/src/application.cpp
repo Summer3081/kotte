@@ -213,7 +213,7 @@ namespace kotte
         const Rectangle new_world_bounds = entity_world_bounds(player_entity);
         spatial_grid_.update(player_handle_, old_world_bounds, new_world_bounds);
         
-        const Rectangle player_world_bounds = entity_world_bounds(player_entity);
+        const Rectangle player_world_bounds = entity_world_bounds(player_entity);   //////////
         const SpatialQuery broad_phase_candidates_query = spatial_grid_.query(player_world_bounds);
 
         for (const EntityHandle candidate_handles : broad_phase_candidates_query.entity_handles){
@@ -314,6 +314,27 @@ namespace kotte
                     .blast_range = bomb_blast_range_
                 }
             };
+
+            bool tile_has_bomb = false;
+            const Vector2 current_position = request.world_position;
+            for (EntityHandle active_handle : active_bomb_handles_)   //////////////
+            {
+                const Entity* actived_bomb = entities_.try_get(active_handle);
+
+                if (actived_bomb == nullptr) {
+                    continue;
+                }
+                const Vector2 actived_bomb_position = actived_bomb->world_position;
+
+                if (current_position.x == actived_bomb_position.x 
+                              && current_position.y == actived_bomb_position.y) {
+                    tile_has_bomb = true;
+                    break;
+                }
+            }
+            if (tile_has_bomb) {
+                continue;
+            }
             const EntityHandle bomb_handle = entities_.create(bomb);
 
             // The store owns the bomb; these handles are synchronized, non-owning
@@ -336,9 +357,9 @@ namespace kotte
         destroy_entity_requests_.clear();    //遗留的死人名单
         
         entities_ = EntityStore{};
-        spatial_grid_ = SpatialGrid{ {
-        static_cast<float>(map_.width() * tile_size_), static_cast<float>(map_.height() * tile_size_) }, 
-        spatial_cell_size_ };       /////////////////
+        spatial_grid_ = SpatialGrid{ {static_cast<float>(map_.width() * tile_size_), 
+                                      static_cast<float>(map_.height() * tile_size_) }, 
+                                                                    spatial_cell_size_ };       /////////////////
         
         populate_entities();
         initialize_enemies();
@@ -764,12 +785,19 @@ namespace kotte
                 continue;
             }
 
-            // Narrow phase: exact-test the remaining solid candidate.
+            // Narrow phase: exact-test the remaining solid candidate.   
             ++collision_diagnostics_.exact_tests;
             if(CheckCollisionRecs(proposed_collision_bounds, entity_collision_bounds(*candidate))){
+                const Rectangle original_collision_bounds = entity_collision_bounds(entity(moving_entity_handle));  ///////////根据正在移动的实体的句柄，先找到这个实体本身，再计算出它的碰撞包围盒矩形
+                if (candidate->kind == EntityKind::bomb){    ////////////candidate's tag is a bomb
+                    if (candidate->bomb_state.has_value() && candidate->bomb_state->owner == moving_entity_handle 
+                            && CheckCollisionRecs(original_collision_bounds, entity_collision_bounds(*candidate))){  ///////////validate the bomb-owner relationship
+                        continue;
+                    }
+                }
                 ++collision_diagnostics_.contacts;
-                blocked = true;
-            }
+                blocked = true;  
+            }    ///////////////
         }
 
         return blocked;
@@ -782,7 +810,7 @@ namespace kotte
         case EntityKind::enemy:
             return true;
         case EntityKind::bomb:
-            return false;
+            return true;       //////////////////bomb has solidified
         }
 
         return false;

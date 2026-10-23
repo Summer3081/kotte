@@ -66,7 +66,7 @@ namespace kotte
 
         struct BombDetonated final {
             EntityHandle bomb;
-            EntityHandle owner;
+            EntityHandle owner;             /////////////////
             Vector2 world_position{};
             std::uint8_t blast_range = 0;
         };
