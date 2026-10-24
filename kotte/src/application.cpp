@@ -102,6 +102,13 @@ namespace kotte
         if (game_state_ != State::playing) {
             return;
         } 
+        if (combo_countdown_ > 0) {
+            combo_countdown_ -= delta_time;
+            if(combo_countdown_ <= 0){
+                combo_multiplier_ = 1;
+                combo_countdown_ = 0.0f;
+            }
+        }
         update_player(delta_time);
         update_enemies(delta_time);
         queue_bomb_placement();
@@ -378,12 +385,17 @@ namespace kotte
         active_bomb_handles_.clear();        //上一局的炸弹和敌人名单
         enemy_handles_.clear();              //活着的敌人名单
         destroy_entity_requests_.clear();    //遗留的死人名单
-        
+
         entities_ = EntityStore{};
         spatial_grid_ = SpatialGrid{ {static_cast<float>(map_.width() * tile_size_), 
                                       static_cast<float>(map_.height() * tile_size_) }, 
                                                                     spatial_cell_size_ };       /////////////////
-        
+
+        update_blast_range_ = bomb_blast_range_;
+        current_score_ = 0;
+        combo_countdown_ = 0.0f;
+        combo_multiplier_ = 1;
+
         populate_entities();
         initialize_enemies();
     }
@@ -401,6 +413,12 @@ namespace kotte
             const Entity* doomed = entities_.try_get(request.entity);
             if(doomed == nullptr){
                 continue;
+            }
+            ////////Score&Combp system when kill enemies
+            if (doomed->kind == EntityKind::enemy) {
+                current_score_ += 10 * combo_multiplier_;
+                combo_multiplier_ += 1;
+                combo_countdown_ = combo_max_interval_;
             }
 
             // Spatial membership is derived from the live entity, so remove it
@@ -653,6 +671,12 @@ namespace kotte
             "bomb blast range: {}",
             update_blast_range_);
         DrawText(diagnostics.c_str(), 10, 130, 20, RAYWHITE);
+
+        diagnostics = std::format(
+            "score: {} | combo: {}x",
+            current_score_,
+            combo_multiplier_);
+        DrawText(diagnostics.c_str(), 10, 154, 20, RAYWHITE);
 
         diagnostics = std::format("seed: {}", seed_);
         DrawText(diagnostics.c_str(), 10, window_.height() - 78, 20, RAYWHITE);

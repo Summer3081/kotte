@@ -149,6 +149,12 @@ namespace kotte
         static constexpr Color wall_color_{0x78, 0x5f, 0x47, 0xff};
         static constexpr Color power_up_color_{0xf2, 0x8f, 0x3b, 0xe8}; ///////////////
 
+        //Score and Combo system
+        std::size_t current_score_ = 0;
+        std::size_t combo_multiplier_ = 1;
+        float combo_countdown_ = 0.0f;
+        static constexpr float combo_max_interval_ = 5.0f;
+
         Window window_; // Constructed first, destroyed last.
         Camera camera_;
         Random random_;
