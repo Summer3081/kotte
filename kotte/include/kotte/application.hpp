@@ -122,7 +122,7 @@ namespace kotte
         [[nodiscard]] static bool is_solid(EntityKind kind) noexcept;
         [[nodiscard]] static Vector2 cardinal_vector(CardinalDirection direction) noexcept;
         [[nodiscard]] CardinalDirection different_enemy_direction(CardinalDirection current_direction);
-        [[nodiscard]] bool owner_has_active_bomb(EntityHandle owner) const noexcept;
+        [[nodiscard]] std::size_t owner_has_active_bomb(EntityHandle owner) noexcept;
         [[nodiscard]] static Vector2 tile_centre(Vector2 world_position) noexcept;
         [[nodiscard]] static Vector2 tile_centre(int column, int row) noexcept;
         [[nodiscard]] static Color entity_color(EntityKind kind) noexcept;
@@ -155,8 +155,12 @@ namespace kotte
         float combo_countdown_ = 0.0f;
         static constexpr float combo_max_interval_ = 5.0f;
 
+        //Number of bombs
+        static constexpr int max_bomb_capacity_ = 3;
+        std::size_t current_active_bombs_ = 0;
+
         Window window_; // Constructed first, destroyed last.
-        Camera camera_;
+        Camera camera_;  
         Random random_;
         TileMap map_;
         EntityStore entities_;             //////////////////

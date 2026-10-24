@@ -330,8 +330,8 @@ namespace kotte
     void Application::apply_bomb_placements(){
         for(const PlaceBombRequest& request : place_bomb_requests_){
             const Entity* owner = entities_.try_get(request.owner);
-            if(owner == nullptr || owner->kind != EntityKind::player
-                || owner_has_active_bomb(request.owner)){
+            if(owner == nullptr || owner->kind != EntityKind::player     //////////////
+                || owner_has_active_bomb(request.owner) >= max_bomb_capacity_){
                 continue;
             }
 
@@ -909,13 +909,27 @@ namespace kotte
         return static_cast<CardinalDirection>(new_value);
     }
 
-    bool Application::owner_has_active_bomb(EntityHandle owner) const noexcept{
-        return std::ranges::any_of(active_bomb_handles_, [this, owner](EntityHandle bomb_handle){
+    //bool Application::owner_has_active_bomb(EntityHandle owner) const noexcept{
+    //    return std::ranges::any_of(active_bomb_handles_, [this, owner](EntityHandle bomb_handle){
+    //        const Entity* bomb = entities_.try_get(bomb_handle);
+    //        return bomb != nullptr
+    //            && bomb->bomb_state.has_value()
+    //            && bomb->bomb_state->owner == owner;
+    //    });
+    //}
+
+    size_t Application::owner_has_active_bomb(EntityHandle owner) noexcept {
+        current_active_bombs_ = 0;
+
+        for (const EntityHandle bomb_handle : active_bomb_handles_) {
             const Entity* bomb = entities_.try_get(bomb_handle);
-            return bomb != nullptr
+            if (bomb != nullptr 
                 && bomb->bomb_state.has_value()
-                && bomb->bomb_state->owner == owner;
-        });
+                && bomb->bomb_state->owner == owner) {
+                current_active_bombs_ += 1;
+            }
+        }
+        return current_active_bombs_;
     }
 
     Vector2 Application::tile_centre(Vector2 world_position) noexcept{
