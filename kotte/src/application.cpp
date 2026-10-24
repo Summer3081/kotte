@@ -467,6 +467,7 @@ namespace kotte
         const SpatialQuery contacts = spatial_grid_.query(tile_bounds);
         bool blocked_by_crate = false;
         bool blocked_by_player = false;
+        bool blocked_by_bomb = false;
 
         for(const EntityHandle handle : contacts.entity_handles){
             const Entity* candidate = entities_.try_get(handle);
@@ -476,7 +477,19 @@ namespace kotte
             }
 
             switch(candidate->kind){
-            case EntityKind::bomb:
+            case EntityKind::bomb: {  ///////check weather handle is already in the flame area
+                auto bom = std::ranges::find(bomb_detonated_facts_, handle, &BombDetonated::bomb);
+                if (bom == bomb_detonated_facts_.end()) {
+                    bomb_detonated_facts_.push_back({
+                        handle,
+                        candidate->bomb_state->owner,        /////who put this bomb
+                        candidate->world_position,           /////the real-position of bomb
+                        candidate->bomb_state->blast_range   /////bomb's flame range
+                    });
+                }
+                blocked_by_bomb = true;
+                break;
+            }
             case EntityKind::enemy:
                 destroy_entity_requests_.push_back({handle});
                 break;
