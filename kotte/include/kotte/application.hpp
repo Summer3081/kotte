@@ -147,7 +147,7 @@ namespace kotte
         static constexpr Color crate_color_{0xb0, 0x72, 0x3c, 0xff};
         static constexpr Color enemy_color_{0xd9, 0x4f, 0x70, 0xff};
         static constexpr Color wall_color_{0x78, 0x5f, 0x47, 0xff};
-        static constexpr Color power_up_color_{0xf2, 0x8f, 0x3b, 0xe8}; ///////////////
+        static constexpr Color power_up_color_{0x00, 0x66, 0xFF, 0xff}; ///////////////
 
         //Score and Combo system
         std::size_t current_score_ = 0;
@@ -156,7 +156,7 @@ namespace kotte
         static constexpr float combo_max_interval_ = 5.0f;
 
         //Number of bombs
-        static constexpr int max_bomb_capacity_ = 3;
+        static constexpr int max_bomb_capacity_ = 5;
         std::size_t current_active_bombs_ = 0;
 
         Window window_; // Constructed first, destroyed last.

@@ -1,64 +1,32 @@
-# Bomberman World — [your game title]
+# Bomberman World — [BombMan]
 
-**Student:** [your name]
-
-> Replace the prompts below and remove these instructions. Keep answers brief. Your implementation explanations and reflection belong in the presentation; you do not need to write them out here. Complete the final section only if seeking Pass with Distinction (VG).
+**Student:** [Xinyi Long]
 
 ## How to play
 
-- **Controls:** [movement, bombs, restart, and any extension controls]
-- **Objective and rules:** [how to win/lose; which result wins if both happen together; any extension rules needed to understand the game]
-- **Configurations / demo setup:** [how to select gameplay/stress configurations and use any special setup or debug keys; write “default” where appropriate]
+- **Controls:** [press WASD or arrow keys to move, press SPACE to place a bomb, press ENTER ro restart the game, and press Q/ESCAPE to quit.]
+- **Objective and rules:** [The Winning condition is to destroy all the enemies; the defeat condition is that the player is destroyed(The player dies when touching enemies or explosions' flames), which result in "Victory!" or "Defeat!" shows on the screen; There are 3 power-ups(the little blue dot) on the map, collecting them will increase the power of your bomb.]
+- **Configurations / demo setup:** [Default]
 
 ## Features and validation
 
-(delete this pre-amble before submitting the assignment) Complete the five required features and three extensions of your choice. For each row, document **at least one useful check: what you tested, what you observed, and how the result compares with the expected behaviour**. One or two sentences per feature are enough. Choose a check that could reveal a mistake, such as a boundary case or interaction.
-
-Use the practical checks in the assignment to validate the acceptance conditions during development; this table is a small sample of that work. Manual play in a small, repeatable setup is sufficient. You can also use a debugger, temporary logging, or small scenarios set up in code. Screenshots, recordings, automated tests etc are welcome, but not required. Be ready to explain the relevant rules in your code.
-
 | Feature | Check, observed result, and expected behaviour |
 | --- | --- |
-| 1. Player damage and death | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| 2. Round states and objective | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| 3. Safe restart | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| 4. Solid bombs with owner escape | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| 5. Blast-range pickup | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| [# and name of chosen extension 1] | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| [# and name of chosen extension 2] | [what I tested, what I observed, and whether it matched the expected behaviour] |
-| [# and name of chosen extension 3] | [what I tested, what I observed, and whether it matched the expected behaviour] |
+| 1. Player damage and death | [I made the player walked into an enemy and stood inside a bomb's blast area. The player was destroyed and the text "Defeat!" appeared, matching the expected bahaviour.] |
+| 2. Round states and objective | [I change the size of map from (200, 120) into (40, 24) to help me test it more quickly, and deatroyed all the enemies. The game state immediately switched to "Victory!", showing the winning condition is correctly.] |
+| 3. Safe restart | [After games over, I pressed ENTER. The game reset the score, bomb blast range, combo, and the number of enemies. Clearing all previous blast effects and bombs, and repopulated the map perfectly.] |
+| 4. Solid bombs with owner escape | [I placed a bomb, stand still on it won't be pushed away, step off it, and walk back, the bomb acted as a solid wall blocking player to return.Matching the expected bahaviour.] |
+| 5. Blast-range pickup | [I picked up a power-up and placed a bomb, the range of blast spanned further than the default range, the value for the blast range displayed in the top_left corner is also right.] |
+| [# Extension 1: Scoring and combos] | [First, I adjusted the combo countdown from 5.0 seconds to 10.0 seconds to make testing easier.I then defeated two enemies within the countdown. I found the score increase with a rising combo multiplier, and the multiplier corrretly reset to 1x when no enemy was defeated after 10 seconds] |
+| [# Extension 2: Entities and ownership] | [I rapidly pressed SPACE, but I can place at most 5 bombs at the same time. Once a bomb detonated and left the active-bomb list, my capacity instantly recovered, allowing me to place another.] |
+| [# Extension 3: Chain reactions] | [I placed two bombs within each other's blast range. The fist explosion's flame will immediately trigger the second bomb, causing it to detonate prematurely with no loop crash occurring.] |
 
-Example: “I ended a round with live bombs and restarted three times to check that old-round state was cleared. No old explosions appeared, and bomb capacity reset each time.” Report your actual results, including any failures or remaining limitations; stating that something “works” does not describe a check.
+Example: “I ended a round with live bombs and restarted three times to check that old-round state was cleared. No old explosions appeared, and bomb capacity reset each time.” Report your actual results, including any failures or remaining limitations; stating that something “works” does not describe a check.   
 
-**Known issues:** [remaining problems and how to encounter them, or “None known after testing”]
+**Known issues:** [None known after testing]
 
 ## Sources and assistance
 
 This project builds on the shared Kotte foundations.
 
-[Briefly identify meaningful external code/resources, discussion or collaboration, and AI assistance. Link to sources where relevant, say what they contributed, and explain what you checked yourself. State “None beyond the course material” if applicable. No prompt transcript or activity diary is needed. Retain required licence/attribution notices.]
-
-## Architectural investigation — VG only
-
-Delete this section for a G submission. For VG, pose a focused engineering question about one decision in your implementation, investigate it, and draw a conclusion from evidence. Documenting the explanation already required for G is not enough. Aim for half a page to one page, excluding small tables, diagrams, or code excerpts. You can use the same decision in your presentation too.
-
-### Decision
-
-[State the question you are investigating and the implementation decision it concerns. Describe your current approach and a plausible alternative. Identify the relevant code. You do not need to implement the alternative.]
-
-### Method
-
-[How did you investigate the decision? Give enough detail to reproduce the key observation: setup, input, configuration/seed, and the test, trace, debugger inspection, or other method used.]
-
-### Evidence
-
-[What did you actually observe in your game? Include the relevant result or a small excerpt, table, or link to supporting material.]
-
-### Interpretation
-
-[Explain why it happened using the relevant code or architecture. Analyse at least one edge case, failure, defect, limitation, or trade-off illustrated by the investigation. Discuss relevant consequences for correctness, maintainability, performance, and/or scalability; you do not need to cover all four.]
-
-### Conclusion
-
-[When is your approach appropriate, what limits it, and when might an alternative become preferable? Base the conclusion on your evidence. Confirming that the current approach is suitable is a valid result.]
-
-<!-- Submission: commit and push this README with your source to GitHub or the internal Gitea server. Submit the final commit link and a runnable Release ZIP from that version in Studium. Ensure the teacher can access the repository throughout assessment. -->
+[A friend helped me understand C++ const restrictions and how to use std::ranges syntax.I reviewed and applied the conceptes in my own code.]
