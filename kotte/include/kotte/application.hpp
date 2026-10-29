@@ -52,7 +52,7 @@ namespace kotte
             victory,
             defeat
         };
-        State game_state_ = State::playing;     //因为state是需要长期使用的，所以名字结尾带_
+        State game_state_ = State::playing;
         
         struct FrameActions final {
             Vector2 player_movement_direction{};
@@ -66,7 +66,7 @@ namespace kotte
 
         struct BombDetonated final {
             EntityHandle bomb;
-            EntityHandle owner;             /////////////////
+            EntityHandle owner;
             Vector2 world_position{};
             std::uint8_t blast_range = 0;
         };
@@ -147,7 +147,7 @@ namespace kotte
         static constexpr Color crate_color_{0xb0, 0x72, 0x3c, 0xff};
         static constexpr Color enemy_color_{0xd9, 0x4f, 0x70, 0xff};
         static constexpr Color wall_color_{0x78, 0x5f, 0x47, 0xff};
-        static constexpr Color power_up_color_{0x00, 0x66, 0xFF, 0xff}; ///////////////
+        static constexpr Color power_up_color_{0x00, 0x66, 0xFF, 0xff};
 
         //Score and Combo system
         std::size_t current_score_ = 0;
@@ -163,20 +163,20 @@ namespace kotte
         Camera camera_;  
         Random random_;
         TileMap map_;
-        EntityStore entities_;             //////////////////
-        std::vector<EntityHandle> enemy_handles_;          ///////////////////   
-        std::vector<EntityHandle> active_bomb_handles_;    ///////////////////
+        EntityStore entities_;
+        std::vector<EntityHandle> enemy_handles_; 
+        std::vector<EntityHandle> active_bomb_handles_;
         SpatialGrid spatial_grid_;
         Renderer renderer_;
         FrameActions frame_actions_;
         std::vector<PlaceBombRequest> place_bomb_requests_;
         std::vector<BombDetonated> bomb_detonated_facts_;
-        std::vector<DestroyEntityRequest> destroy_entity_requests_;   //////////////////
-        std::vector<BlastEffect> blast_effects_;                      //////////////////
-        std::uint8_t update_blast_range_ = bomb_blast_range_;     //////////////powerup bomb
+        std::vector<DestroyEntityRequest> destroy_entity_requests_;
+        std::vector<BlastEffect> blast_effects_;
+        std::uint8_t update_blast_range_ = bomb_blast_range_;//powerup bomb
         CollisionDiagnostics collision_diagnostics_;
         std::uint64_t seed_;
-        EntityHandle player_handle_;        /////////////////
+        EntityHandle player_handle_;
         bool exit_requested_ = false;
     };
 }

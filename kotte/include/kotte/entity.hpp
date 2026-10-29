@@ -13,7 +13,7 @@ namespace kotte
         bomb,
         crate,
         enemy,
-        power_up       /////////////////
+        power_up
     };
 
     enum class CardinalDirection : std::uint8_t {
@@ -34,6 +34,6 @@ namespace kotte
         EntityKind kind = EntityKind::crate;
         Vector2 world_position{};
         CardinalDirection movement_heading = CardinalDirection::right;
-        std::optional<BombState> bomb_state;    //////只有炸弹类型的实体，bomb_state里才会装着炸弹的详细数据
+        std::optional<BombState> bomb_state;
     };
 }
