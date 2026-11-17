@@ -494,7 +494,7 @@ namespace kotte
             }
         }
 
-        return blocked_by_crate;
+        return blocked_by_crate || blocked_by_bomb;
     }
 
     void Application::append_blast_ray(
