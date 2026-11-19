@@ -9,21 +9,41 @@
 #include <utility>
 
 namespace kotte
-{    
+{
     Application::Application(
         int width,
         int height,
         std::string_view title,
-        std::uint64_t seed,
+        //int tile_map_width,
+        //int tile_map_height,
+        //std::uint64_t seed,
+        const quicktype::Config& config,
         int target_fps)
-        : window_{width, height, title, target_fps}
-        , camera_{window_.size()}
-        , random_{seed}
-        , map_{make_room(200, 120, random_)}
-        , spatial_grid_{{
+        : window_{ width, height, title, target_fps }
+        , camera_{ window_.size() }
+        //, random_{seed}
+        //, room_width_{ tile_map_width }
+        //, room_height_{ tile_map_height }
+        //, map_{ make_room(room_width_, room_height_, random_) }
+        , random_{ static_cast<std::uint64_t>(config.get_seed()) }
+        , map_{ make_room(
+            static_cast<int>(config.get_tile_map_width()),
+            static_cast<int>(config.get_tile_map_height()),
+            random_) }
+        , spatial_grid_{ {
             static_cast<float>(map_.width() * tile_size_),
-            static_cast<float>(map_.height() * tile_size_)}, spatial_cell_size_}
-        , seed_{seed}{
+            static_cast<float>(map_.height() * tile_size_) }, spatial_cell_size_ }
+        //, seed_{seed}{
+        , config_{ config } {
+        input_.bind(Action::quit, { KEY_ESCAPE, KEY_Q });
+        input_.bind(Action::place_bomb, { KEY_SPACE });
+        input_.bind(Action::restart, { KEY_ENTER });
+        input_.bind(Direction::move,
+            { KEY_UP, KEY_W },
+            { KEY_DOWN, KEY_S },
+            { KEY_LEFT, KEY_A },
+            { KEY_RIGHT, KEY_D });
+
         populate_entities();
         initialize_enemies();
     }
@@ -67,34 +87,40 @@ namespace kotte
     }
 
     void Application::collect_frame_actions() noexcept{
-        if(IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_Q)){
+        if (input_.pressed(Action::quit)) {
             request_exit();
         }
-        frame_actions_.place_bomb = IsKeyPressed(KEY_SPACE);
+        frame_actions_.place_bomb = input_.pressed(Action::place_bomb);
+        frame_actions_.player_movement_direction = input_.get(Direction::move);
+        if (game_state_ != State::playing && input_.pressed(Action::restart)) {
+            return restart();
+        }
 
-        Vector2& movement_direction = frame_actions_.player_movement_direction;
-        if(IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)){
-            movement_direction.x -= 1.0f;
-        }
-        if(IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)){
-            movement_direction.x += 1.0f;
-        }
-        if(IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)){
-            movement_direction.y -= 1.0f;
-        }
-        if(IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)){
-            movement_direction.y += 1.0f;
-        }
-        if (game_state_ != State::playing) {
-            if (IsKeyPressed(KEY_ENTER)) {
-                return restart();
-            }
-        }
-        
-        // Normalize intent before simulation so bindings cannot change movement speed.
-        if(movement_direction.x != 0.0f || movement_direction.y != 0.0f){
-            movement_direction = Vector2Normalize(movement_direction);
-        }
+        //frame_actions_.place_bomb = IsKeyPressed(KEY_SPACE);
+
+        //Vector2& movement_direction = frame_actions_.player_movement_direction;
+        //if(IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)){
+        //    movement_direction.x -= 1.0f;
+        //}
+        //if(IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)){
+        //    movement_direction.x += 1.0f;
+        //}
+        //if(IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)){
+        //    movement_direction.y -= 1.0f;
+        //}
+        //if(IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)){
+        //    movement_direction.y += 1.0f;
+        //}
+        //if (game_state_ != State::playing) {
+        //    if (IsKeyPressed(KEY_ENTER)) {
+        //        return restart();
+        //    }
+        //}
+        //
+        //// Normalize intent before simulation so bindings cannot change movement speed.
+        //if(movement_direction.x != 0.0f || movement_direction.y != 0.0f){
+        //    movement_direction = Vector2Normalize(movement_direction);
+        //}
     }
 
     void Application::update_gameplay(float delta_time){
@@ -608,7 +634,7 @@ namespace kotte
             const Vector2 screen_position = camera_.world_to_screen({bounds.x, bounds.y});
             bounds.x = screen_position.x;
             bounds.y = screen_position.y;
-            const RenderLayer layer = visible_candidate->kind == EntityKind::bomb
+            const RenderLayer layer = (visible_candidate->kind == EntityKind::bomb || visible_candidate ->kind == EntityKind::power_up)
                 ? RenderLayer::ground
                 : RenderLayer::world;
             renderer_.submit({
@@ -681,7 +707,7 @@ namespace kotte
             combo_multiplier_);
         DrawText(diagnostics.c_str(), 10, 154, 20, RAYWHITE);
 
-        diagnostics = std::format("seed: {}", seed_);
+        diagnostics = std::format("seed: {}", config_.get_seed());
         DrawText(diagnostics.c_str(), 10, window_.height() - 78, 20, RAYWHITE);
 
         diagnostics = std::format(
